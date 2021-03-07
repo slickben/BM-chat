@@ -5,7 +5,7 @@
             <!-- breadcumb -->
             <BreadCumb/>
             <!-- user profile -->
-            <UserProfile/>
+            <UserProfile :username="username" :users="users"/>
 
             <SearchBar/>
 
@@ -35,6 +35,7 @@
     import ChatHistoryBar from '../components/ChatHistoryBar.vue';
     import ChatHistory from '../components/ChatHistory.vue';
     import MassegeCard from '../components/MassegeCard.vue';
+    import io from 'socket.io-client';
 
     export default {
         name: "Chat",
@@ -45,6 +46,48 @@
             ChatHistoryBar,
             ChatHistory,
             MassegeCard,
+        },
+        data () {
+            return {
+                username: '',
+                socket: io("http://localhost:3000"),
+                users: [],
+                messages: []
+            }
+        },
+
+        methods: {
+            joinServer () {
+                this.socket.on("loggedIn", data => {
+                    console.log(data)
+                    this.users = data.users
+                    this.messages = data.messages
+                    this.socket.emit("newuser", this.username)
+                })
+                
+
+                this.listen()
+            }, 
+            listen () {
+                this.socket.on("userOnline", user => {
+                    this.users.push(user)
+                })
+
+                console.log('here..')
+                
+                this.socket.on("userLeft", user => {
+                    this.users.splice(users.indexOf(user), 1)
+                })
+            }
+        },
+        mounted () {
+            this.username = prompt("what is your name", "anonymous")
+
+            if(!this.username){
+                this.username = "anonymous"
+            }
+
+            this.joinServer()
         }
     }
 </script>
