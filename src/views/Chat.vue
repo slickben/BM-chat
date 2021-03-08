@@ -50,30 +50,33 @@
         data () {
             return {
                 username: '',
-                socket: io("http://localhost:3000"),
+                socket: io("http://localhost:3000", {transports: ['websocket'] }),
                 users: [],
                 messages: []
             }
         },
-
         methods: {
             joinServer () {
                 this.socket.on("loggedIn", data => {
-                    console.log(data)
+                    console.log("here")
                     this.users = data.users
                     this.messages = data.messages
                     this.socket.emit("newuser", this.username)
                 })
                 
+                this.socket.on("connect_error", (err) => {
+                    console.log(`connect_error due to ${err}`);
+                });
 
                 this.listen()
             }, 
             listen () {
                 this.socket.on("userOnline", user => {
+                    console.log('here..')
                     this.users.push(user)
                 })
 
-                console.log('here..')
+                
                 
                 this.socket.on("userLeft", user => {
                     this.users.splice(users.indexOf(user), 1)
@@ -86,7 +89,7 @@
             if(!this.username){
                 this.username = "anonymous"
             }
-
+            console.log(this.socket)
             this.joinServer()
         }
     }
