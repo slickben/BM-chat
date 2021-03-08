@@ -1,12 +1,13 @@
 import { createWebHistory, createRouter} from "vue-router";
 import Home from "./views/Home.vue";
 import Chat from "./views/Chat.vue"
+import SignUp from "./views/SignUp.vue"
 
 const history = createWebHistory();
 
 const routes = [
     {
-        path: "/home",
+        path: "/",
         name: "home",
         component: Home
     },
@@ -15,6 +16,11 @@ const routes = [
         path: "/chat",
         name: "chat",
         component: Chat
+    },
+    {
+        path: "/register",
+        name: "register",
+        component: SignUp
     }
 ];
 

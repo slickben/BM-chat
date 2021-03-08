@@ -12,35 +12,18 @@
         <!-- messages -->
         <div class="flex-grow px-6 py-4 overflow-auto h-full max-h-70vh">
             <!-- message -->
-            <Messages/>    
 
-            <!-- reply -->
-            <Replies/>
-
-            <!-- message -->
-            <Messages/>    
-
-            <!-- reply -->
-            <Replies/>
-
-            <!-- reply -->
-            <Replies/>
-
-            <!-- message -->
-            <Messages/>    
-
-            <!-- reply -->
-            <Replies/>
-
-            <!-- reply -->
-            <Replies/>
+            <div v-for="message in messages" :key="message.index">
+                <Messages v-if="message.username === user" :message="message.msg"/>    
+                <Replies v-else :message="message.msg"/>
+            </div>
 
         </div>
 
         <!-- send message input -->
 
         <div class="flex-grow-0 px-6 py-4">
-            <SendMessageInput/>
+            <SendMessageInput @button-clicked="sendMessage"/>
         </div>
     </div>
 </template>
@@ -52,11 +35,25 @@
 
     export default {
         name: "MessagesCard",
+        props: {
+            messages: {
+                required: false
+            },
+            user: {
+                required: false
+            }
+        },
         components: {
             Messages,
             Replies,
             SendMessageInput
-        }
+        },
+        methods: {
+            sendMessage (message) {
+                console.log('here')
+                this.$emit('send-message', message)
+            }
+        },
 
 
     }

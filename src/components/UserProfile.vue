@@ -5,7 +5,7 @@
         <h3 class="py-2 text-lg font-semibold text-gray-700">Benson Momodu</h3>
 
         <div class="flex justify-center items-center">
-            <span class="px-4 py-1 rounded-3xl text-purple-600 bg-purple-300">@ {{username}}</span> {{ users }}
+            <span class="px-4 py-1 rounded-3xl text-purple-600 bg-purple-300">@ {{username}}</span> {{ userOnline }}
         </div>
     </div>
 </template>
@@ -17,7 +17,7 @@
                 type: String,
                 required: false,
             },
-            users: {
+            userOnline: {
                 required: false
             }
         }

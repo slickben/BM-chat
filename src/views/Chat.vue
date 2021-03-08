@@ -5,7 +5,7 @@
             <!-- breadcumb -->
             <BreadCumb/>
             <!-- user profile -->
-            <UserProfile :username="username" :users="users"/>
+            <UserProfile :username="username" :UsersOnline="usersOnline"/>
 
             <SearchBar/>
 
@@ -17,11 +17,12 @@
         </div>
       </div>
       <div class="col-span-4 lg:col-span-3 py-3 max-h-full">
-          <MassegeCard/>
+          <MassegeCard :user="username" :messages="messages" v-on:send-message="sendMessage"/>
       </div>
       <div class="py-6 hidden lg:block ">
           <!-- breadcumb -->
         <BreadCumb/>
+        {{usersOnline}}
         <!-- user profile -->
         <UserProfile/>
       </div>
@@ -50,15 +51,19 @@
         data () {
             return {
                 username: '',
-                socket: io("http://localhost:3000", {transports: ['websocket'] }),
+                socket: io("http://localhost:3000", {transports: ['websocket']}),
                 users: [],
-                messages: []
+                messages: [],
+                notLogin: true,
             }
         },
         methods: {
+            sendMessage (message) {
+                console.log(message)
+                this.socket.emit("msg", message)
+            },
             joinServer () {
                 this.socket.on("loggedIn", data => {
-                    console.log("here")
                     this.users = data.users
                     this.messages = data.messages
                     this.socket.emit("newuser", this.username)
@@ -72,25 +77,29 @@
             }, 
             listen () {
                 this.socket.on("userOnline", user => {
-                    console.log('here..')
                     this.users.push(user)
                 })
-
-                
-                
                 this.socket.on("userLeft", user => {
-                    this.users.splice(users.indexOf(user), 1)
+                    this.users.splice(this.users.indexOf(user), 1)
+                    console.log('here.....')
+                })
+                this.socket.on("msg", message => {
+                    this.messages.push(message)
                 })
             }
         },
-        mounted () {
-            this.username = prompt("what is your name", "anonymous")
-
-            if(!this.username){
-                this.username = "anonymous"
+        computed: {
+            usersOnline() {
+                return this.users.length
             }
-            console.log(this.socket)
+        },
+        mounted () {
+            this.username = this.$route.params.username
+
             this.joinServer()
+
+            console.log(this.$route.params)
+            
         }
     }
 </script>

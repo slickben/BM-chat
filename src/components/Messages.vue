@@ -5,7 +5,7 @@
             <p class="text-xs mb-2">12/34</p>
             <div class="flex justify-between items-center bg-white px-4 py-3 
             rounded-tl-3xl rounded-br-3xl rounded-tr-3xl">
-                <p class="font-semibold text-sm">Romel marvel</p>
+                <p class="font-semibold text-sm">{{message}}</p>
             </div>    
         </div>
     </div>
@@ -13,6 +13,12 @@
 
 <script>
     export default {
+        name: "Message",
+        props: {
+            message: {
+                required: false
+            }
+        }
         
     }
 </script>
