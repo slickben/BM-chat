@@ -5,7 +5,7 @@
             <!-- breadcumb -->
             <BreadCumb/>
             <!-- user profile -->
-            <UserProfile :username="username" :UsersOnline="usersOnline"/>
+            <UserProfile :profile="userProfile"/>
 
             <SearchBar/>
 
@@ -22,9 +22,8 @@
       <div class="py-6 hidden lg:block ">
           <!-- breadcumb -->
         <BreadCumb/>
-        {{usersOnline}}
         <!-- user profile -->
-        <UserProfile/>
+        <!-- <UserProfile/> -->
       </div>
     </div>
 </template>
@@ -37,6 +36,7 @@
     import ChatHistory from '../components/ChatHistory.vue';
     import MassegeCard from '../components/MassegeCard.vue';
     import io from 'socket.io-client';
+    import randomProfile  from 'random-profile-generator';
 
     export default {
         name: "Chat",
@@ -51,10 +51,12 @@
         data () {
             return {
                 username: '',
+                user: "",
                 socket: io("http://localhost:3000", {transports: ['websocket']}),
                 users: [],
                 messages: [],
                 notLogin: true,
+                userProfile: {}
             }
         },
         methods: {
@@ -66,7 +68,7 @@
                 this.socket.on("loggedIn", data => {
                     this.users = data.users
                     this.messages = data.messages
-                    this.socket.emit("newuser", this.username)
+                    this.socket.emit("newuser", this.userProfile)
                 })
                 
                 this.socket.on("connect_error", (err) => {
@@ -91,14 +93,24 @@
         computed: {
             usersOnline() {
                 return this.users.length
-            }
+            },
         },
         mounted () {
+            this.user = randomProfile.profile()
             this.username = this.$route.params.username
+
+            let userData = {
+                username: this.username,
+                fullName: this.user.fullName,
+                avatar: this.user.avatar
+            }
+
+            this.userProfile = userData
 
             this.joinServer()
 
-            console.log(this.$route.params)
+            console.log(this.userProfile)
+            console.log(this.user)
             
         }
     }
