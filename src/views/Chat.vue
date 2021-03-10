@@ -13,7 +13,7 @@
         </div>
 
         <div class="max-h-30vh overflow-auto">
-            <ChatHistory/>
+            <UsersList v-on:select-receiver="receiverSelected" :users="users"/>
         </div>
       </div>
       <div class="col-span-4 lg:col-span-3 py-3 max-h-full">
@@ -33,7 +33,7 @@
     import UserProfile from '../components/UserProfile.vue';
     import SearchBar from '../components/SearchBar.vue';
     import ChatHistoryBar from '../components/ChatHistoryBar.vue';
-    import ChatHistory from '../components/ChatHistory.vue';
+    import UsersList from '../components/UsersList.vue';
     import MassegeCard from '../components/MassegeCard.vue';
     import io from 'socket.io-client';
     import randomProfile  from 'random-profile-generator';
@@ -45,7 +45,7 @@
             UserProfile,
             SearchBar,
             ChatHistoryBar,
-            ChatHistory,
+            UsersList,
             MassegeCard,
         },
         data () {
@@ -56,17 +56,41 @@
                 users: [],
                 messages: [],
                 notLogin: true,
-                userProfile: {}
+                userProfile: {},
+                receiver: "",
+                privateMessage: []
             }
         },
         methods: {
+            notifyUserWhoHasSendMessage(message){
+                this.users.map(user => {
+                    if(user.user === message.sender){
+                        user.message = message.message
+                        user.hasNewMessage = true
+                    }
+                })
+            },
+            receiverSelected(receiver) {
+                this.receiver = receiver
+            },
             sendMessage (message) {
-                console.log(message)
-                this.socket.emit("msg", message)
+                let data = {
+                    sender: this.username,
+                    receiver: this.receiver,
+                    message: message
+                }
+                this.socket.emit("privateMessage", data)
             },
             joinServer () {
                 this.socket.on("loggedIn", data => {
-                    this.users = data.users
+                    let alluser = data.users.map( user => {
+                        return {
+                            user: user,
+                            hasNewMessage: false,
+                            newMessage: ""
+                        }
+                    })
+                    this.users = alluser
                     this.messages = data.messages
                     this.socket.emit("newuser", this.userProfile)
                 })
@@ -79,15 +103,29 @@
             }, 
             listen () {
                 this.socket.on("userOnline", user => {
-                    this.users.push(user)
+                    let newUser = {
+                        user: user,
+                        hasNewMessage: false,
+                        newMessage: ""
+                    }
+                    this.users.push(newUser)
+                    console.log(user)
                 })
                 this.socket.on("userLeft", user => {
-                    this.users.splice(this.users.indexOf(user), 1)
+                    let userToRM = this.users.filter((ele, index, array) => {
+                        return ele.user === user
+                    })
+                    this.users.splice(this.users.indexOf(userToRM), 1)
                     console.log('here.....')
                 })
-                this.socket.on("msg", message => {
-                    this.messages.push(message)
+                this.socket.on("new_message", message => {
+                    this.notifyUserWhoHasSendMessage(message)
+                    this.privateMessage.push(message)
                 })
+
+                this.socket.onAny((event, ...args) => {
+                    console.log(event, args);
+                });
             }
         },
         computed: {
@@ -110,7 +148,7 @@
             this.joinServer()
 
             console.log(this.userProfile)
-            console.log(this.user)
+            console.log(this.users)
             
         }
     }
