@@ -17,7 +17,7 @@
         </div>
       </div>
       <div class="col-span-4 lg:col-span-3 py-3 max-h-full">
-          <MassegeCard :user="username" :messages="messages" v-on:send-message="sendMessage"/>
+          <MassegeCard :user="username" :selectedUser="receiver" :messages="selectedUserMessages" v-on:send-message="sendMessage"/>
       </div>
       <div class="py-6 hidden lg:block ">
           <!-- breadcumb -->
@@ -58,7 +58,8 @@
                 notLogin: true,
                 userProfile: {},
                 receiver: "",
-                privateMessage: []
+                privateMessage: [],
+                selectedUserMessages: []
             }
         },
         methods: {
@@ -67,11 +68,36 @@
                     if(user.user === message.sender){
                         user.message = message.message
                         user.hasNewMessage = true
+                        if(this.receiver === message.sender){
+                            user.read = true
+                        }else {
+                            user.read = false
+                        }
+                        
+                    }
+                })
+            },
+            getAllMessageOfTheSelectedUser (receiver) {
+                this.selectedUserMessages = []
+
+                this.privateMessage.map( message => {
+                    if(message.sender === receiver & message.receiver === this.username || message.sender === this.username & message.receiver === receiver ) {
+
+                        this.selectedUserMessages.push(message)
                     }
                 })
             },
             receiverSelected(receiver) {
+
+                this.getAllMessageOfTheSelectedUser(receiver)
+
                 this.receiver = receiver
+                this.users.map( user => {
+                    if(user.user === receiver && user.hasNewMessage){
+                        user.read = true
+                        console.log(this.user.read)
+                    }
+                })
             },
             sendMessage (message) {
                 let data = {
@@ -80,6 +106,10 @@
                     message: message
                 }
                 this.socket.emit("privateMessage", data)
+
+                this.privateMessage.push(data)
+
+                this.getAllMessageOfTheSelectedUser(this.receiver)
             },
             joinServer () {
                 this.socket.on("loggedIn", data => {
@@ -87,7 +117,8 @@
                         return {
                             user: user,
                             hasNewMessage: false,
-                            newMessage: ""
+                            newMessage: "",
+                            read: false
                         }
                     })
                     this.users = alluser
@@ -106,7 +137,8 @@
                     let newUser = {
                         user: user,
                         hasNewMessage: false,
-                        newMessage: ""
+                        newMessage: "",
+                        read: false
                     }
                     this.users.push(newUser)
                     console.log(user)
@@ -121,6 +153,7 @@
                 this.socket.on("new_message", message => {
                     this.notifyUserWhoHasSendMessage(message)
                     this.privateMessage.push(message)
+                    this.getAllMessageOfTheSelectedUser(this.receiver)
                 })
 
                 this.socket.onAny((event, ...args) => {
