@@ -1,6 +1,18 @@
 import { createApp } from 'vue';
 import App from './App.vue';
 import './index.css';
+import axios from "axios";
+import store from './store';
+
+const base = axios.create({
+    baseURL: "http://localhost:3000" // replace on production env
+});
+
+const token = localStorage.getItem('user-token')
+
+if (token) {
+  axios.defaults.headers.common['Authorization'] = token
+}
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { 
@@ -17,6 +29,14 @@ import router from "./router.js"
 
 const app = createApp(App)
 
+
+
+app.config.globalProperties.$http = base;
+
 app.component('font-awesome-icon', FontAwesomeIcon)
 
-app.use(router).mount('#app')
+app.use(store.store)
+
+app.use(router)
+
+app.mount('#app')

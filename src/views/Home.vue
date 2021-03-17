@@ -44,20 +44,51 @@
 </template>
 
 <script>
-export default {
-    name: "Home",
-    data () {
-        return {
-            username: ""
-        }
-    },
-    methods: {
-        onSubmit() {
-            this.$router.push({ name: 'chat', params: { username: this.username }})
-            this.notLogin = false
+    import randomProfile  from 'random-profile-generator';
+    import { createLogger } from 'vuex'
+
+    export default {
+        name: "Home",
+        data () {
+            return {
+                username: ""
+            }
         },
-    },
-}
+        methods: {
+            
+            async onSubmit() {
+                let randomPro = randomProfile.profile()
+                console.log(createLogger)
+
+                let userData = {
+                    username: this.username,
+                    fullname: randomPro.fullName,
+                    avatar: randomPro.avatar
+                }
+
+                try {
+                    let response = await this.$http.post("/login", userData);
+                    console.log(response.data)
+
+                    let token = response.data.username
+
+                    localStorage.setItem('user-token', token)
+
+                    this.$store.commit('AUTH_SUCCESS', token)
+
+                    this.$store.commit('ADD_USERNAME', response.data.username)
+
+                    // navigate to a protected resource 
+                    this.$router.push("/chat");
+                } catch (err) {
+
+                     this.$store.commit("AUTH_ERROR", err)
+
+                    localStorage.removeItem('user-token')
+                }
+            },
+        },
+    }
 </script>
 
 <style scoped>

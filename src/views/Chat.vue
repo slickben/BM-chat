@@ -13,7 +13,7 @@
         </div>
 
         <div class="max-h-30vh overflow-auto">
-            <UsersList v-on:select-receiver="receiverSelected" :users="users"/>
+            <UsersList v-on:select-receiver="receiverSelected"/>
         </div>
       </div>
       <div class="col-span-4 lg:col-span-3 py-3 max-h-full">
@@ -121,9 +121,10 @@
                             read: false
                         }
                     })
-                    this.users = alluser
-                    this.messages = data.messages
-                    this.socket.emit("newuser", this.userProfile)
+                    console.log(data)
+                    this.$store.commit('ADD_USERS', alluser)
+
+                    this.socket.emit("newuser", this.$store.state.username)
                 })
                 
                 this.socket.on("connect_error", (err) => {
@@ -140,8 +141,8 @@
                         newMessage: "",
                         read: false
                     }
-                    this.users.push(newUser)
-                    console.log(user)
+                    this.$store.commit('ADD_USERS', newUser)
+                    console.log(this.$store.state.users)
                 })
                 this.socket.on("userLeft", user => {
                     let userToRM = this.users.filter((ele, index, array) => {
@@ -167,22 +168,7 @@
             },
         },
         mounted () {
-            this.user = randomProfile.profile()
-            this.username = this.$route.params.username
-
-            let userData = {
-                username: this.username,
-                fullName: this.user.fullName,
-                avatar: this.user.avatar
-            }
-
-            this.userProfile = userData
-
             this.joinServer()
-
-            console.log(this.userProfile)
-            console.log(this.users)
-            
         }
     }
 </script>
