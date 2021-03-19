@@ -70,13 +70,15 @@
                     let response = await this.$http.post("/login", userData);
                     console.log(response.data)
 
-                    let token = response.data.username
+                    let token = response.data.username  
 
                     localStorage.setItem('user-token', token)
 
                     this.$store.commit('AUTH_SUCCESS', token)
 
                     this.$store.commit('ADD_USERNAME', response.data.username)
+
+                    this.$store.commit('ADD_USER_PROFILE', response.data)
 
                     // navigate to a protected resource 
                     this.$router.push("/chat");

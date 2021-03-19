@@ -1,5 +1,5 @@
 <template>
-    <form @submit.prevent="buttonClick" class="bg-white rounded-3xl px-4 pr-6 py-1 flex justify-between items-center">
+    <form @submit.prevent="submitMessage" class="bg-white rounded-3xl px-4 pr-6 py-1 flex justify-between items-center">
         <input v-model="msg" class="py-2 focus:outline-none" type="text" 
         placeholder="Type your message here...">
 
@@ -18,12 +18,15 @@
             }
         },
         methods: {
-            buttonClick () {
+            submitMessage () {
                 if(!this.msg) {
                     alert('please text a message')
                     return
+                }else if(!this.$store.state.receiver){
+                    alert('please pls select who to send the message to ')
+                    return
                 }
-                this.$emit("button-clicked", this.msg)
+                this.$store.dispatch("sendMessage", this.msg)
                 console.log(this.msg)
                 this.msg = ""
             }

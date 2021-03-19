@@ -23,7 +23,7 @@
         <!-- send message input -->
 
         <div class="flex-grow-0 px-6 py-4">
-            <SendMessageInput @button-clicked="sendMessage"/>
+            <SendMessageInput/>
         </div>
     </div>
 </template>
@@ -32,30 +32,24 @@
     import Messages from './Messages.vue';
     import Replies from './Replies.vue';
     import SendMessageInput from './SendMessageInput.vue';
+    import { mapState } from 'vuex'
 
     export default {
         name: "MessagesCard",
-        props: {
-            messages: {
-                required: false
-            },
-            user: {
-                required: false
-            },
-            selectedUser: {
-                required: false
-            }
-        },
+
+        computed: mapState({
+            // arrow functions can make the code very succinct!
+            selectedUser: state => state.receiver,
+            user: state => state.username,
+            messages: state => state.selectedUserMessages,
+
+        }),
         components: {
             Messages,
             Replies,
             SendMessageInput
         },
         methods: {
-            sendMessage (message) {
-                console.log('here')
-                this.$emit('send-message', message)
-            }
         },
 
 

@@ -27,11 +27,12 @@
         }),
         methods: {
             selectReceiver(user) {
-                this.$emit("select-receiver", user)
+                this.$store.dispatch('selectReceiver', user)
+                console.log(this.$store.state.receiver)
             }
         },
         mounted() {
-            this.active
+            console.log(this.$store.state.users)
         }
     }
 </script>

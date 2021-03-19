@@ -6,23 +6,21 @@
         <h3 class="py-2 text-lg font-semibold text-gray-700">{{profile.fullName}}</h3>
 
         <div class="flex justify-center items-center">
-            <span class="px-4 py-1 rounded-3xl text-purple-600 bg-purple-300">@{{profile.username}}</span> {{ userOnline }}
+            <span class="px-4 py-1 rounded-3xl text-purple-600 bg-purple-300">@{{profile.username}}</span> 
         </div>
     </div>
 </template>
 
 <script>
+    import { mapState } from 'vuex'
+
     export default {
-        props: {
-            profile: {
-                required: false,
-            },
-            userOnline: {
-                required: false
-            }
-        },
+        computed: mapState({
+            // arrow functions can make the code very succinct!
+            profile: state => state.userProfile
+        }),
         mounted () {
-            console.log(this.profile)
+            console.log(this.$store.state.userProfile)
         }
     }
 </script>

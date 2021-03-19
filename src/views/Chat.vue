@@ -13,11 +13,11 @@
         </div>
 
         <div class="max-h-30vh overflow-auto">
-            <UsersList v-on:select-receiver="receiverSelected"/>
+            <UsersList/>
         </div>
       </div>
       <div class="col-span-4 lg:col-span-3 py-3 max-h-full">
-          <MassegeCard :user="username" :selectedUser="receiver" :messages="selectedUserMessages" v-on:send-message="sendMessage"/>
+          <MassegeCard/>
       </div>
       <div class="py-6 hidden lg:block ">
           <!-- breadcumb -->
@@ -36,7 +36,6 @@
     import UsersList from '../components/UsersList.vue';
     import MassegeCard from '../components/MassegeCard.vue';
     import io from 'socket.io-client';
-    import randomProfile  from 'random-profile-generator';
 
     export default {
         name: "Chat",
@@ -63,54 +62,6 @@
             }
         },
         methods: {
-            notifyUserWhoHasSendMessage(message){
-                this.users.map(user => {
-                    if(user.user === message.sender){
-                        user.message = message.message
-                        user.hasNewMessage = true
-                        if(this.receiver === message.sender){
-                            user.read = true
-                        }else {
-                            user.read = false
-                        }
-                        
-                    }
-                })
-            },
-            getAllMessageOfTheSelectedUser (receiver) {
-                this.selectedUserMessages = []
-
-                this.privateMessage.map( message => {
-                    if(message.sender === receiver & message.receiver === this.username || message.sender === this.username & message.receiver === receiver ) {
-
-                        this.selectedUserMessages.push(message)
-                    }
-                })
-            },
-            receiverSelected(receiver) {
-
-                this.getAllMessageOfTheSelectedUser(receiver)
-
-                this.receiver = receiver
-                this.users.map( user => {
-                    if(user.user === receiver && user.hasNewMessage){
-                        user.read = true
-                        console.log(this.user.read)
-                    }
-                })
-            },
-            sendMessage (message) {
-                let data = {
-                    sender: this.username,
-                    receiver: this.receiver,
-                    message: message
-                }
-                this.socket.emit("privateMessage", data)
-
-                this.privateMessage.push(data)
-
-                this.getAllMessageOfTheSelectedUser(this.receiver)
-            },
             joinServer () {
                 this.socket.on("loggedIn", data => {
                     let alluser = data.users.map( user => {
@@ -125,6 +76,12 @@
                     this.$store.commit('ADD_USERS', alluser)
 
                     this.socket.emit("newuser", this.$store.state.username)
+                })
+
+                this.$store.commit('ADD_SOCKET_IO', this.socket)
+
+                this.socket.on('previous_messages', messages => {
+                    this.$store.commit('PRIVATE_MESSAGE', messages)
                 })
                 
                 this.socket.on("connect_error", (err) => {
@@ -145,16 +102,20 @@
                     console.log(this.$store.state.users)
                 })
                 this.socket.on("userLeft", user => {
-                    let userToRM = this.users.filter((ele, index, array) => {
-                        return ele.user === user
-                    })
-                    this.users.splice(this.users.indexOf(userToRM), 1)
-                    console.log('here.....')
+
+                    this.commit('REMOVE_USER_WHO_HAS_GONE_OFLINE', user)
+                    
                 })
+
                 this.socket.on("new_message", message => {
+                    this.$store.commit('NOTIFY_USER_WHO_HAS_NEW_MESSAGE', message)
+
                     this.notifyUserWhoHasSendMessage(message)
-                    this.privateMessage.push(message)
-                    this.getAllMessageOfTheSelectedUser(this.receiver)
+
+                    this.$store.commit('PRIVATE_MESSAGE', message)
+
+                    this.$store.commit('GET_ALL_MESSAGE_OF_THE_SELECTED_USER', this.$store.state.receiver)
+
                 })
 
                 this.socket.onAny((event, ...args) => {
