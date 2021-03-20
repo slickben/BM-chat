@@ -17,12 +17,12 @@ if (token) {
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { 
     faUserSecret, faUsers, faSms, faHome, faChevronLeft, 
-    faSearch, faPlus, faPaperPlane
+    faSearch, faPlus, faPaperPlane, faCircle, faArrowLeft,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 library.add(faUserSecret, faUsers, faSms, faHome, faChevronLeft, faSearch, 
-    faPlus, faPaperPlane
+    faPlus, faPaperPlane, faCircle, faArrowLeft
 )
 
 import router from "./router.js"

@@ -1,7 +1,7 @@
 <template>
-  <div class="flex w-full h-screen max-h-screen overflow-hidden">
+  <div class="md:flex bg-gray-200 md:bg-white w-full h-screen max-h-screen overflow-hidden">
     <!-- logo -->
-      <div class="flex-none flex flex-col  px-3 ">
+      <div class="hidden flex-none flex md:flex-col  px-3 ">
         <!-- logo -->
         <Logo/>
 

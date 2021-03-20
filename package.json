@@ -11,10 +11,13 @@
     "@fortawesome/free-solid-svg-icons": "^5.15.2",
     "@fortawesome/vue-fontawesome": "^3.0.0-3",
     "axios": "^0.21.1",
+    "moment": "^2.29.1",
     "random-profile-generator": "^2.3.0",
     "socket.io-client": "^3.1.2",
     "ui-avatars": "^1.0.0",
+    "user-generator": "^1.0.0",
     "vue": "^3.0.5",
+    "vue-moment": "^4.1.0",
     "vue-router": "^4.0.0-alpha.11",
     "vuex": "^4.0.0"
   },
@@ -23,6 +26,7 @@
     "@vue/compiler-sfc": "^3.0.5",
     "autoprefixer": "^10.2.5",
     "postcss": "^8.2.7",
+    "tailwind-scrollbar": "^1.2.4",
     "tailwindcss": "^2.0.3",
     "vite": "^2.0.5"
   }

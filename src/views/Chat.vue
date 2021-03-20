@@ -1,22 +1,22 @@
 <template>
-    <div class="flex-grow md:border-l rounded-xl grid grid-cols-1 md:grid-cols-6 lg:grid-cols-5 md:pr-6 pr-3">
-      <div class="hidden md:block py-6 max-h-65vh col-span-2 lg:col-span-1">
+    <div class="flex-grow md:border-l rounded-xl grid grid-cols-1 md:grid-cols-6 lg:grid-cols-5 md:pr-6 md:pr-3">
+      <div class="hidden md:block md:py-6 max-h-65vh col-span-2 lg:col-span-1">
         <div class="">
             <!-- breadcumb -->
             <BreadCumb/>
             <!-- user profile -->
-            <UserProfile :profile="userProfile"/>
+            <UserProfile/>
 
             <SearchBar/>
 
             <ChatHistoryBar/>
         </div>
 
-        <div class="max-h-30vh overflow-auto">
+        <div class="scrollbar-thin scrollbar-thumb-purple-500 scrollbar-track-purple-300 overflow-y-scroll scrollbar-thumb-rounded max-h-30vh overflow-auto">
             <UsersList/>
         </div>
       </div>
-      <div class="col-span-4 lg:col-span-3 py-3 max-h-full">
+      <div class="col-span-4 lg:col-span-3 md:py-3 max-h-full">
           <MassegeCard/>
       </div>
       <div class="py-6 hidden lg:block ">
@@ -49,16 +49,7 @@
         },
         data () {
             return {
-                username: '',
-                user: "",
                 socket: io("http://localhost:3000", {transports: ['websocket']}),
-                users: [],
-                messages: [],
-                notLogin: true,
-                userProfile: {},
-                receiver: "",
-                privateMessage: [],
-                selectedUserMessages: []
             }
         },
         methods: {
@@ -66,14 +57,28 @@
                 this.socket.on("loggedIn", data => {
                     let alluser = data.users.map( user => {
                         return {
-                            user: user,
+                            user: user.username,
+                            avatar: user.avatar,
                             hasNewMessage: false,
                             newMessage: "",
-                            read: false
+                            read: false,
+                            online: false
                         }
                     })
-                    console.log(data)
+
+                    data.usersOnline.map( userOnline => {
+                        // update user status
+                        alluser.map( user => {
+                            if(user.user === userOnline) {
+                                user.online = true
+                            }
+                        })
+                    })
+                    
                     this.$store.commit('ADD_USERS', alluser)
+
+                    // console.log(this.$store.state.users)
+                    // console.log(this.$store.state.userProfile)
 
                     this.socket.emit("newuser", this.$store.state.username)
                 })
@@ -85,7 +90,7 @@
                 })
                 
                 this.socket.on("connect_error", (err) => {
-                    console.log(`connect_error due to ${err}`);
+                    // console.log(`connect_error due to ${err}`);
                 });
 
                 this.listen()
@@ -96,21 +101,20 @@
                         user: user,
                         hasNewMessage: false,
                         newMessage: "",
-                        read: false
+                        read: false,
+                        online: true
                     }
                     this.$store.commit('ADD_USERS', newUser)
-                    console.log(this.$store.state.users)
+                    // console.log(this.$store.state.users)
                 })
                 this.socket.on("userLeft", user => {
-
-                    this.commit('REMOVE_USER_WHO_HAS_GONE_OFLINE', user)
+                    console.log(user)
+                    this.$store.commit('UPDATE_USER_WHO_HAS_GONE_OFFLINE', user)
                     
                 })
 
                 this.socket.on("new_message", message => {
                     this.$store.commit('NOTIFY_USER_WHO_HAS_NEW_MESSAGE', message)
-
-                    this.notifyUserWhoHasSendMessage(message)
 
                     this.$store.commit('PRIVATE_MESSAGE', message)
 

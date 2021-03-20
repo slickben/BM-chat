@@ -1,4 +1,5 @@
 import { createStore } from 'vuex'
+import moment from 'moment';
 
 // Create a new store instance.
 const store = createStore({
@@ -11,7 +12,7 @@ const store = createStore({
         receiver: '',
         privateMessage: [],
         selectedUserMessages: [],
-        userProfile: {},
+        userProfile: JSON.parse(localStorage.getItem('user-profile')) || '',
         socket: ''
       }
     },
@@ -35,11 +36,13 @@ const store = createStore({
             state.status = err
         },
         ADD_USERS (state, data) {
+            
             if(state.users.length <= 0) {
                 state.users = data
             }else {
 
                 // check if user exit
+                console.log(data)
                 let ifUserExit = state.users.map((user) => {
                     if(user.user === data.user){
                         return  user
@@ -48,7 +51,15 @@ const store = createStore({
                     }
                 })
 
+                console.log(ifUserExit)
                 if(ifUserExit) {
+                    // update the user is exit
+                    state.users.map( user => {
+                        if(user.user == data.user) 
+                        {
+                            user.online = true
+                        }
+                    })
                     return
                 }else {
                     state.users.push(data)
@@ -85,7 +96,7 @@ const store = createStore({
         },
         PRIVATE_MESSAGE(state, message){
             if(state.privateMessage.length <= 0) {
-                state.users = message
+                state.privateMessage = message
             }else {
                 state.privateMessage.push(message)
             }
@@ -105,12 +116,15 @@ const store = createStore({
             })
         },
 
-        REMOVE_USER_WHO_HAS_GONE_OFLINE (state, user) {
+        UPDATE_USER_WHO_HAS_GONE_OFFLINE (state, userOffline) {
 
-            let userToRM = state.users.filter((ele, index, array) => {
-                return ele.user === user
+            state.users.map( user => {
+                if(user.user == userOffline) 
+                {
+                    console.log(user)
+                    user.online = false
+                }
             })
-            state.users.splice(state.users.indexOf(userToRM), 1)
         }
     },
     actions: {
@@ -124,17 +138,23 @@ const store = createStore({
                     user.read = true
                 }
           })
+          console.log(state.users)
         },
         sendMessage ({ commit, state }, message) {
+
+            let currentTime = Date()
+
+            let time = moment(currentTime).format("hh:mm A")
+
             let data = {
                 sender: state.username,
                 receiver: state.receiver,
-                message: message
+                message: message,
+                time: time,
+                avatar: state.userProfile.avatar
             }
             console.log(data)
             state.socket.emit("privateMessage", data)
-
-            commit('PRIVATE_MESSAGE', data)
 
             commit('PRIVATE_MESSAGE', data)
 

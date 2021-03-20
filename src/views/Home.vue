@@ -55,24 +55,58 @@
             }
         },
         methods: {
+            getRandomColor() {
+                var letters = '0123456789ABCDEF';
+                var color = '#';
+                for (var i = 0; i < 6; i++) {
+                    color += letters[Math.floor(Math.random() * 16)];
+                }
+                return color;
+            },
+            generateAvatar(text, foregroundColor, backgroundColor) {
+                const canvas = document.createElement("canvas");
+                const context = canvas.getContext("2d");
+
+                canvas.width = 200;
+                canvas.height = 200;
+
+                // Draw background
+                context.fillStyle = backgroundColor;
+                context.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Draw text
+                context.font = "bold 100px Assistant";
+                context.fillStyle = foregroundColor;
+                context.textAlign = "center";
+                context.textBaseline = "middle";
+                context.fillText(text, canvas.width / 2, canvas.height / 2);
+
+                return canvas.toDataURL("image/png");
+            },
             
             async onSubmit() {
+
                 let randomPro = randomProfile.profile()
                 console.log(createLogger)
+
+                let res = randomPro.firstName.charAt(0) + randomPro.lastName.charAt(0)
 
                 let userData = {
                     username: this.username,
                     fullname: randomPro.fullName,
-                    avatar: randomPro.avatar
+                    avatar: this.generateAvatar(res, 'white', this.getRandomColor())
                 }
 
                 try {
+
                     let response = await this.$http.post("/login", userData);
                     console.log(response.data)
 
                     let token = response.data.username  
 
                     localStorage.setItem('user-token', token)
+
+                    localStorage.setItem('user-profile', JSON.stringify(response.data))
 
                     this.$store.commit('AUTH_SUCCESS', token)
 
