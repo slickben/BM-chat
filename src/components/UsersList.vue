@@ -4,14 +4,14 @@
         v-for="user in users" :key="user.user" 
         class="px-2 py-2 focus:outline-none hover:bg-gray-200 w-full flex items-center mb-1">
             <span class="relative">
-                <img class="flex-grow-0 w-7 h-7 xl:w-10 xl:h-10 rounded rounded-full" :src="user.avatar" alt="" srcset="">
+                <img class="flex-grow-0 w-10 h-10 xl:w-10 xl:h-10 rounded rounded-full" :src="user.avatar" alt="" srcset="">
                 <span :class="{'text-green-500': user.online }" class="text-gray-500 absolute bottom-0 left-0 flex items-center">
                     <font-awesome-icon icon="circle" size="xs" />
                 </span>
             </span>
             <div class="px-2 flex-grow">
                 <div class="flex justify-between items-center">
-                    <p class="font-semibold text-xs xl:text-sm">{{ user.user }}</p>
+                    <p class="font-semibold text-sm xl:text-sm">{{ user.user }}</p>
                     <span v-show="user.isTyping" class="text-xs text-green-400"> is typing.... </span>
                 </div>
                 <p class="text-xxs xl:text-xs text-gray-400 text-left">{{ user.message }}</p>
