@@ -1,6 +1,6 @@
 <template>
     <form @submit.prevent="submitMessage" class="bg-white rounded-3xl px-4 pr-6 py-1 flex justify-between items-center">
-        <input v-model="msg" class="py-2 focus:outline-none" type="text" 
+        <input @keydown="isTyping" v-model="msg" class="py-2 focus:outline-none" type="text" 
         placeholder="Type your message here...">
 
         <button :disabled="!msg" type="submit" class="focus:outline-none text-xl text-purple-600">
@@ -29,6 +29,9 @@
                 this.$store.dispatch("sendMessage", this.msg)
                 console.log(this.msg)
                 this.msg = ""
+            },
+            isTyping () {
+                this.$store.dispatch('isTyping')
             }
         },
     }

@@ -12,7 +12,7 @@
             <div class="px-2 flex-grow">
                 <div class="flex justify-between items-center">
                     <p class="font-semibold text-xs xl:text-sm">{{ user.user }}</p>
-                    <span v-show="user.hasNewMessage" class="text-xs hidden xl:block text-gray-400">New Message</span>
+                    <span v-show="user.isTyping" class="text-xs text-green-400"> is typing.... </span>
                 </div>
                 <p class="text-xxs xl:text-xs text-gray-400 text-left">{{ user.message }}</p>
             </div>
@@ -34,6 +34,7 @@
         methods: {
             selectReceiver(user) {
                 this.$store.dispatch('selectReceiver', user)
+                this.$store.commit('TOGGLE_CHAT')
                 console.log(this.$store.state.receiver)
             }
         },

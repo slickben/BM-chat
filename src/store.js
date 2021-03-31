@@ -2,6 +2,7 @@ import { createStore } from 'vuex'
 import moment from 'moment';
 
 // Create a new store instance.
+
 const store = createStore({
     state () {
       return {
@@ -13,7 +14,11 @@ const store = createStore({
         privateMessage: [],
         selectedUserMessages: [],
         userProfile: JSON.parse(localStorage.getItem('user-profile')) || '',
-        socket: ''
+        socket: '',
+        isChat: false,
+        typing: false,
+        timeout : undefined,
+        selectedUser: {}
       }
     },
     getters: {
@@ -32,6 +37,9 @@ const store = createStore({
             state.status = "sucess"
             state.token = username
         },
+        TOGGLE_CHAT (state ) {
+            state.isChat = !state.isChat
+        },
         AUTH_ERROR (state, err) {
             state.status = err
         },
@@ -43,13 +51,7 @@ const store = createStore({
 
                 // check if user exit
                 console.log(data)
-                let ifUserExit = state.users.map((user) => {
-                    if(user.user === data.user){
-                        return  user
-                    }else{
-                        return null
-                    }
-                })
+                let ifUserExit = state.users.some( user => user.user === data.user)
 
                 console.log(ifUserExit)
                 if(ifUserExit) {
@@ -82,7 +84,14 @@ const store = createStore({
             state.username = username
         },
         Add_RECEIVER(state, receiver) {
-            state.receiver = receiver
+            state.receiver = receiver,
+            state.users.map( user => {
+                if(user.user === receiver) {
+                    state.selectedUser = user
+                }
+            })
+
+            console.log(state.selectedUser)
         },
         GET_ALL_MESSAGE_OF_THE_SELECTED_USER (state, receiver) {
             state.selectedUserMessages = []
@@ -115,6 +124,41 @@ const store = createStore({
                 }
             })
         },
+        SET_TIMEOUT (state) {
+            state.typing = false;
+            state.socket.emit('noLongerTyping',{user:state.username, receiver:state.receiver, typing:false});
+        },
+
+        UPDATE_USER_TYPING(state, data) {
+            
+            if(data.typing === true) {
+
+                if(data.user === state.selectedUser.user) {
+                    state.selectedUser.isTyping = true
+                }
+
+                state.users.map( user => {
+                    if(data.user === user.user) {
+                        
+                        user.isTyping = true
+                    }
+                })
+                console.log(state.users)
+            }
+            else {
+
+                if(data.user === state.selectedUser.user) {
+                    state.selectedUser.isTyping = true
+                }
+
+                state.users.map( user => {
+                    if(data.user === user.user) {
+                        user.isTyping = false
+                    }
+                })
+                console.log(state.users)
+            }
+        },
 
         UPDATE_USER_WHO_HAS_GONE_OFFLINE (state, userOffline) {
 
@@ -140,7 +184,9 @@ const store = createStore({
           })
           console.log(state.users)
         },
-        sendMessage ({ commit, state }, message) {
+        sendMessage ({ commit, state}, message) {
+
+            commit('SET_TIMEOUT')
 
             let currentTime = Date()
 
@@ -160,6 +206,27 @@ const store = createStore({
 
             commit('GET_ALL_MESSAGE_OF_THE_SELECTED_USER', state.receiver,)
         },
+        timeoutFunction({commit, state}) {
+            
+        },
+        isTyping ({commit, state, dispatch}) {
+
+            if(state.typing == false) {
+                state.typing = true
+                state.socket.emit('typingtoPrivate',{user:state.username, receiver:state.receiver, typing:true});
+                
+                state.timeout = setTimeout(function(){ 
+                    commit('SET_TIMEOUT')
+                 }, 5000);
+                
+            } 
+            else {
+                clearTimeout(state.timeout);
+                state.timeout = setTimeout(function(){ 
+                    commit('SET_TIMEOUT')
+                 }, 5000);
+            }
+        }
     }
 })
 

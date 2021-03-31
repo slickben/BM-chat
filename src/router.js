@@ -2,12 +2,13 @@ import { createWebHistory, createRouter} from "vue-router";
 import Home from "./views/Home.vue";
 import Chat from "./views/Chat.vue"
 import SignUp from "./views/SignUp.vue"
+import MobileHome from "./views/MobileHome.vue"
 import store from './store';
 
 if(!store.store.getters.isAuthenticated) {
     console.log('not auth')
 }else {
-    console.log('auth')
+    console.log('auth', screen.width)
 }
 
 const ifNotAuthenticated = (to, from, next) => {
@@ -22,7 +23,12 @@ const ifNotAuthenticated = (to, from, next) => {
   const ifAuthenticated = (to, from, next) => {
     if (store.store.getters.isAuthenticated) {
         console.log(' authenticated')
-      next()
+        // if(screen.width > 500) {
+        //     next('/chat')
+        // }else {
+        //     next('/home')
+        // }
+        next()
       return
     }
     next('/')
@@ -42,6 +48,12 @@ const routes = [
     {
         path: "/chat",
         name: "chat",
+        component: Chat,
+        beforeEnter: ifAuthenticated,
+    },
+    {
+        path: "/rooms",
+        name: "rooms",
         component: Chat,
         beforeEnter: ifAuthenticated,
     },

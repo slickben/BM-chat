@@ -1,6 +1,6 @@
 <template>
     <div class="flex-grow md:border-l rounded-xl grid grid-cols-1 md:grid-cols-6 lg:grid-cols-5 md:pr-6 md:pr-3">
-      <div class="hidden md:block md:py-6 max-h-65vh col-span-2 lg:col-span-1">
+      <div class="md:py-6 max-h-65vh col-span-2 lg:col-span-1 hidden md:block">
         <div class="">
             <!-- breadcumb -->
             <BreadCumb/>
@@ -16,7 +16,7 @@
             <UsersList/>
         </div>
       </div>
-      <div class="col-span-4 lg:col-span-3 md:py-3 max-h-full">
+      <div class="col-span-4 lg:col-span-3 md:py-3 max-h-full hidden md:block">
           <MassegeCard/>
       </div>
       <div class="py-6 hidden lg:block ">
@@ -25,6 +25,38 @@
         <!-- user profile -->
         <!-- <UserProfile/> -->
       </div>
+      <!-- mobile view -->
+      <div v-show="!isChat" class="flex flex-col md:hidden md:py-10 h-screen">
+          <!-- mobile header -->
+            <div class="flex-none">
+              <div>
+              <Logo />
+            </div>
+            <div class="flex px-6 pt-1 items-end justify-between">
+                <!-- <img class="w-20 h-20 mx-auto rounded-full" :src="profile.avatar" alt=""> -->
+                <router-link to="" class="py-1">
+                    <img class="w-10 h-10 rounded-full" :src="profile.avatar" alt="">
+                </router-link >
+                <router-link to="/chat" class="text-center text-xl font-semibold border-b-2 border-gray-400 px-6">
+                    <span>Chat</span>
+                </router-link >
+                <router-link to="/rooms" class="text-center text-xl font-semibold">
+                    <span>Rooms</span>
+                </router-link >
+            </div>
+            </div>
+            <div class="scrollbar-thin scrollbar-thumb-purple-500 scrollbar-track-purple-300 overflow-y-scroll        scrollbar-thumb-rounded md:max-h-30vh overflow-auto bg-white flex-grow">
+                <UsersList/>
+            </div>
+      </div>
+
+      <div v-show="isChat" class="md:py-3 max-h-full md:hidden block">
+          <MassegeCard/>
+      </div>
+    </div>
+
+    <div>
+
     </div>
 </template>
 
@@ -35,7 +67,9 @@
     import ChatHistoryBar from '../components/ChatHistoryBar.vue';
     import UsersList from '../components/UsersList.vue';
     import MassegeCard from '../components/MassegeCard.vue';
+    import Logo from '../components/Logo.vue'
     import io from 'socket.io-client';
+    import { mapState } from 'vuex'
 
     export default {
         name: "Chat",
@@ -46,10 +80,12 @@
             ChatHistoryBar,
             UsersList,
             MassegeCard,
+            Logo,
         },
         data () {
             return {
-                socket: io("http://localhost:3000", {transports: ['websocket']}),
+                socket: io("https://pacific-ocean-92747.herokuapp.com", {transports: ['websocket']}),
+                toggleChat: true
             }
         },
         methods: {
@@ -62,7 +98,9 @@
                             hasNewMessage: false,
                             newMessage: "",
                             read: false,
-                            online: false
+                            online: false,
+                            isTyping: false,
+                            typing: false
                         }
                     })
 
@@ -80,7 +118,7 @@
                     // console.log(this.$store.state.users)
                     // console.log(this.$store.state.userProfile)
 
-                    this.socket.emit("newuser", this.$store.state.username)
+                    this.socket.emit("newuser", {username: this.$store.state.userProfile.username, avatar: this.$store.state.userProfile.avatar })
                 })
 
                 this.$store.commit('ADD_SOCKET_IO', this.socket)
@@ -98,11 +136,14 @@
             listen () {
                 this.socket.on("userOnline", user => {
                     let newUser = {
-                        user: user,
+                        user: user.username,
+                        avatar: user.avatar,
                         hasNewMessage: false,
                         newMessage: "",
                         read: false,
-                        online: true
+                        online: true,
+                        isTyping: false,
+                        typing: false
                     }
                     this.$store.commit('ADD_USERS', newUser)
                     // console.log(this.$store.state.users)
@@ -122,17 +163,26 @@
 
                 })
 
+                this.socket.on('isTyping', data => {
+                    this.$store.commit('UPDATE_USER_TYPING', data)
+                })
+
+                this.socket.on('isNoLongerTyping', data => {
+                    this.$store.commit('UPDATE_USER_TYPING', data)
+                })
+
                 this.socket.onAny((event, ...args) => {
                     console.log(event, args);
                 });
             }
         },
-        computed: {
-            usersOnline() {
-                return this.users.length
-            },
-        },
+        computed: mapState({
+            // arrow functions can make the code very succinct!
+            isChat: state => state.isChat,
+            profile: state => state.userProfile
+        }),
         mounted () {
+            console.log(screen.width)
             this.joinServer()
         }
     }

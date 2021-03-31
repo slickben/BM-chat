@@ -1,12 +1,12 @@
 <template>
-    <div class="bg-gray-200 rounded-xl w-full h-full flex flex-col">
+    <div class="bg-gray-200 rounded-xl w-full h-screen md:h-full flex flex-col ">
         <!-- heading -->
         <div class="flex-grow-0 flex justify-between items-center px-6 py-3 border-b border-gray-400">
             <div class="flex items-center">
-                <router-link to="/" class="md:hidden">
+                <button @click="toggleChat" class="md:hidden">
                     <font-awesome-icon icon="arrow-left" />
-                </router-link>
-                <p class="text-sm md:text-base lg:text-lg font-semibold capitalize ml-3">{{ selectedUser}}</p>
+                </button>
+                <p class="text-sm md:text-base lg:text-lg font-semibold capitalize ml-3">{{ selectedUser.user }} <span v-show="selectedUser.isTyping" class="text-xs text-green-400"> is typing.... </span></p>
             </div>
             <div class="flex justify-between items-center">
                 <span class="px-4 py-1 text-sm md:text-base rounded-3xl text-purple-600 bg-purple-300">Messages</span>
@@ -44,7 +44,7 @@
 
         computed: mapState({
             // arrow functions can make the code very succinct!
-            selectedUser: state => state.receiver,
+            selectedUser: state => state.selectedUser,
             user: state => state.username,
             messages: state => state.selectedUserMessages,
 
@@ -59,6 +59,9 @@
                 let container = this.$el.querySelector("#container");
                 container.scrollTop = container.scrollHeight;
             },
+            toggleChat () {
+                this.$store.commit('TOGGLE_CHAT')
+            }
         },
         updated () {
             this.scrollToEnd()

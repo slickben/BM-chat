@@ -5,7 +5,7 @@ import axios from "axios";
 import store from './store';
 
 const base = axios.create({
-    baseURL: "http://localhost:3000" // replace on production env
+    baseURL: "https://pacific-ocean-92747.herokuapp.com" // replace on production env
 });
 
 const token = localStorage.getItem('user-token')
