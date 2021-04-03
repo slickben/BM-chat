@@ -29,21 +29,21 @@
       <div v-show="!isChat" class="flex flex-col md:hidden md:py-10 h-screen">
           <!-- mobile header -->
             <div class="flex-none">
-              <div>
-              <Logo />
-            </div>
-            <div class="flex px-6 pt-1 items-end justify-between">
-                <!-- <img class="w-20 h-20 mx-auto rounded-full" :src="profile.avatar" alt=""> -->
-                <router-link to="" class="py-1">
-                    <img class="w-10 h-10 rounded-full" :src="profile.avatar" alt="">
-                </router-link >
-                <router-link to="/chat" class="text-center text-xl font-semibold border-b-2 border-gray-400 px-6">
-                    <span>Chat</span>
-                </router-link >
-                <router-link to="/rooms" class="text-center text-xl font-semibold">
-                    <span>Rooms</span>
-                </router-link >
-            </div>
+                <div class="py-2 px-6">
+                    <Logo />
+                </div>
+                <div class="flex px-6 pt-1 items-end justify-between">
+                    <!-- <img class="w-20 h-20 mx-auto rounded-full" :src="profile.avatar" alt=""> -->
+                    <router-link to="" class="py-1">
+                        <img class="w-10 h-10 rounded-full" :src="profile.avatar" alt="">
+                    </router-link >
+                    <router-link to="/chat" class="text-center text-xl font-semibold border-b-2 border-gray-400 px-6">
+                        <span>Chat</span>
+                    </router-link >
+                    <router-link to="/rooms" class="text-center text-xl font-semibold">
+                        <span>Rooms</span>
+                    </router-link >
+                </div>
             </div>
             <div class="scrollbar-thin scrollbar-thumb-purple-500 scrollbar-track-purple-300 overflow-y-scroll        scrollbar-thumb-rounded md:max-h-30vh overflow-auto bg-white flex-grow">
                 <UsersList/>
@@ -82,9 +82,12 @@
             MassegeCard,
             Logo,
         },
+        // https://pacific-ocean-92747.herokuapp.com
+        // http://localhost:4000
         data () {
             return {
-                socket: io("https://pacific-ocean-92747.herokuapp.com", {transports: ['websocket']}),
+                socket: io("http://localhost:4000", {transports: ['websocket']}),
+                
                 toggleChat: true
             }
         },
@@ -117,9 +120,10 @@
 
                     // console.log(this.$store.state.users)
                     // console.log(this.$store.state.userProfile)
-
-                    this.socket.emit("newuser", {username: this.$store.state.userProfile.username, avatar: this.$store.state.userProfile.avatar })
+                    
                 })
+
+                this.socket.emit("newuser", {username: this.$store.state.userProfile.username, avatar: this.$store.state.userProfile.avatar })
 
                 this.$store.commit('ADD_SOCKET_IO', this.socket)
 

@@ -9,16 +9,25 @@ const store = createStore({
         token: localStorage.getItem('user-token') || '',
         status: '',
         users: [],
+        rooms: [],
+        allRooms: [],
+        room: '',
         username: localStorage.getItem('user-token') || '',
         receiver: '',
         privateMessage: [],
+        roomMessages: [],
+        selectedRoomMessages: [],
         selectedUserMessages: [],
         userProfile: JSON.parse(localStorage.getItem('user-profile')) || '',
         socket: '',
         isChat: false,
         typing: false,
+        toggleSearch: false,
+        toggleAddRoom: false,
         timeout : undefined,
-        selectedUser: {}
+        selectedUser: {},
+        isRoomChat: false,
+        filteredRoom: [],
       }
     },
     getters: {
@@ -39,6 +48,15 @@ const store = createStore({
         },
         TOGGLE_CHAT (state ) {
             state.isChat = !state.isChat
+        },
+        TOGGLE_ROOM_CHAT (state ) {
+            state.isRoomChat = !state.isRoomChat
+        },
+        TOGGLE_SEARCH (state ) {
+            state.toggleSearch = !state.toggleSearch
+        },
+        TOGGLE_ADD_ROOM (state ) {
+            state.toggleAddRoom = !state.toggleAddRoom
         },
         AUTH_ERROR (state, err) {
             state.status = err
@@ -70,6 +88,17 @@ const store = createStore({
                 
             }
         },
+        ADD_ROOMS (state, rooms) {
+            state.rooms = rooms
+            console.log(state.rooms)
+        },
+        UPDATE_ROOMS(state, room) {
+            state.rooms.push(room)
+        },
+        ADD_TO_ALL_ROOMS (state, rooms) {
+            state.allRooms = rooms
+            console.log(state.allRooms)
+        },
         ADD_USER_PROFILE (state, data) {
 
             state.userProfile = data
@@ -93,6 +122,9 @@ const store = createStore({
 
             console.log(state.selectedUser)
         },
+        SELECT_ROOM(state, room) {
+            state.room = room
+        },
         GET_ALL_MESSAGE_OF_THE_SELECTED_USER (state, receiver) {
             state.selectedUserMessages = []
 
@@ -110,6 +142,24 @@ const store = createStore({
                 state.privateMessage.push(message)
             }
         },
+        ROOM_MESSAGE (state, messages) {
+            
+            state.roomMessages = messages
+
+            console.log(state.roomMessages)
+
+        },
+        UPDATE_ROOM_MESSAGE(state, message) {
+            state.roomMessages.push(message)
+        },
+        ADD_SELECTED_ROOM_MSG(state, messages){
+            state.selectedRoomMessages = messages
+            console.log(state.selectedRoomMessages)
+        },
+        UPDATE_SELECTED_ROOM_MSG(state, message){
+            state.selectedRoomMessages.push(message)
+            console.log(state.selectedRoomMessages)
+        },
         NOTIFY_USER_WHO_HAS_NEW_MESSAGE(state, message) {
             state.users.map(user => {
                 if(user.user === message.sender){
@@ -124,11 +174,24 @@ const store = createStore({
                 }
             })
         },
+        NOTIFY_ROOM_THAT_HAS_NEW_MESSAGE(state, message) {
+            state.rooms.map(room => {
+                if(room.name === message.room){
+                    room.newMessage = message.msg
+                    room.hasNewMessage = true
+                    if(state.room === message.room){
+                        room.read = true
+                    }else {
+                        room.read = false
+                    }
+                    
+                }
+            })
+        },
         SET_TIMEOUT (state) {
             state.typing = false;
             state.socket.emit('noLongerTyping',{user:state.username, receiver:state.receiver, typing:false});
         },
-
         UPDATE_USER_TYPING(state, data) {
             
             if(data.typing === true) {
@@ -159,7 +222,6 @@ const store = createStore({
                 console.log(state.users)
             }
         },
-
         UPDATE_USER_WHO_HAS_GONE_OFFLINE (state, userOffline) {
 
             state.users.map( user => {
@@ -184,6 +246,19 @@ const store = createStore({
           })
           console.log(state.users)
         },
+        selectRoom ({ commit, state }, room) {
+
+            state.socket.emit('get_room_message', room)
+
+            commit('SELECT_ROOM', room)
+  
+            // state.users.map( user => {
+            //       if(user.user === receiver && user.hasNewMessage){
+            //           user.read = true
+            //       }
+            // })
+            // console.log(state.users)
+        },
         sendMessage ({ commit, state}, message) {
 
             commit('SET_TIMEOUT')
@@ -206,10 +281,24 @@ const store = createStore({
 
             commit('GET_ALL_MESSAGE_OF_THE_SELECTED_USER', state.receiver,)
         },
-        timeoutFunction({commit, state}) {
-            
+        sendMessageToGroup ({commit, state}, message) {
+
+            commit('SET_TIMEOUT')
+
+            let currentTime = Date()
+
+            let data = {
+                user: state.username,
+                room: state.room,
+                msg: message,
+                time: moment(currentTime).format("hh:mm A"),
+                avatar: state.userProfile.avatar
+            }
+            // console.log(data)
+            // commit('UPDATE_SELECTED_ROOM_MSG', data)
+            state.socket.emit("msg", data)
         },
-        isTyping ({commit, state, dispatch}) {
+        isTyping ({commit, state}) {
 
             if(state.typing == false) {
                 state.typing = true

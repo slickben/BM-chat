@@ -2,7 +2,7 @@ import { createWebHistory, createRouter} from "vue-router";
 import Home from "./views/Home.vue";
 import Chat from "./views/Chat.vue"
 import SignUp from "./views/SignUp.vue"
-import MobileHome from "./views/MobileHome.vue"
+import Room from "./views/Room.vue"
 import store from './store';
 
 if(!store.store.getters.isAuthenticated) {
@@ -54,7 +54,7 @@ const routes = [
     {
         path: "/rooms",
         name: "rooms",
-        component: Chat,
+        component: Room,
         beforeEnter: ifAuthenticated,
     },
     {

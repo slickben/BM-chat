@@ -1,5 +1,5 @@
 <template>
-    <div class="flex-grow-0 md:px-2 px-6 pt-2 md:py-6">
+    <div class="flex-grow-0 md:px-2 md:py-6">
         <router-link to="/">
         <h1 class="font-semibold text-2xl text-purple-600">
             <font-awesome-icon icon="sms" /><span class="text-red-500">B</span>
