@@ -86,7 +86,7 @@
         // http://localhost:4000
         data () {
             return {
-                socket: io("// https://pacific-ocean-92747.herokuapp.com", {transports: ['websocket']}),
+                socket: io("https://pacific-ocean-92747.herokuapp.com", {transports: ['websocket']}),
                 
                 toggleChat: true
             }
