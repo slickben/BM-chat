@@ -6,7 +6,7 @@ import store from './store';
 // http://localhost:4000
 // https://pacific-ocean-92747.herokuapp.com
 const base = axios.create({
-    baseURL: "https://pacific-ocean-92747.herokuapp.com" // replace on production env
+    baseURL: "http://localhost:4000" // replace on production env
 });
 
 const token = localStorage.getItem('user-token')

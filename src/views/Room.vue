@@ -38,7 +38,7 @@
                     <!-- :class="{'bg-gray-200': room.hasNewMessage && !room.read }"  -->
                     <div class="py-6 px-4">
                         <button  @click="subscribe(room)" 
-                        v-for="room in filteredRoom" :key="room._id" 
+                        v-for="room in allRooms" :key="room._id" 
                         class="px-2 py-2 focus:outline-none hover:bg-gray-200 w-full flex items-center mb-1">
                             <span class="relative">
                                 <img class="flex-grow-0 w-10 h-10 xl:w-10 xl:h-10 rounded rounded-full" :src="room.avatar" alt="" srcset="">
@@ -158,6 +158,8 @@
 
                 this.$store.commit('UPDATE_ROOMS', editedRoom)
 
+                this.$store.commit('REMOVE_ROOM_FROM_ALL_ROOMS', room)
+
                 this.$store.dispatch('selectRoom', room.name)
 
                 this.$store.commit('TOGGLE_ROOM_CHAT')
@@ -166,10 +168,23 @@
             },
             joinServer () {
                 console.log('ben is here')
-                this.socket.on('get_all_rooms', allroom => {
+                this.socket.on('get_all_rooms', rooms => {
 
-                    this.rooms = []
-                    this.$store.commit('ADD_TO_ALL_ROOMS', allroom)
+                    let allrooms = []
+
+                    let userId = this.$store.state.userProfile._id
+
+                    rooms.filter( room => room.createdBy != userId).map( function(room)  {
+                        console.log('tag', 'here')  
+                        if(room.subscribers.some( subscriber => subscriber.userId ===  userId)){
+                            // console.log(room.subscribers, subscriber.userId, state.userProfile._id)
+                            console.log('object find')
+                        }else {
+                            allrooms.push(room)
+                        }
+                    }), 
+                    
+                    this.$store.commit('ADD_TO_ALL_ROOMS', allrooms)
 
                 })
                 this.socket.emit('get_rooms', this.profile._id)
@@ -247,16 +262,7 @@
                 toggleAddRoom: state => state.toggleAddRoom,
                 toggleSearch: state => state.toggleSearch,
                 socket: state => state.socket,
-                allRooms: state => state.allRooms.filter( room => room.createdBy != state.userProfile._id).map( function(room)  {
-                    console.log('tag', 'here')
-                    if(room.subscribers.some( subscriber => subscriber.userId ===  state.userProfile._id)){
-                        // console.log(room.subscribers, subscriber.userId, state.userProfile._id)
-                        console.log('object find')
-                    }else {
-                        state.filteredRoom.push(room)
-                    }
-                }), 
-                filteredRoom: state => state.filteredRoom
+                allRooms: state => state.allRooms,
             }),
         },
         updated () {
@@ -265,7 +271,7 @@
             console.log(rooms)
         },
         mounted () {
-            
+            this.$store.state.filteredRoom = [];
             this.joinServer()
         }
     }

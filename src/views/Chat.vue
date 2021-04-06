@@ -68,7 +68,6 @@
     import UsersList from '../components/UsersList.vue';
     import MassegeCard from '../components/MassegeCard.vue';
     import Logo from '../components/Logo.vue'
-    import io from 'socket.io-client';
     import { mapState } from 'vuex'
 
     export default {
@@ -86,8 +85,6 @@
         // http://localhost:4000
         data () {
             return {
-                socket: io("https://pacific-ocean-92747.herokuapp.com", {transports: ['websocket']}),
-                
                 toggleChat: true
             }
         },
@@ -106,6 +103,8 @@
                             typing: false
                         }
                     })
+
+                    console.log(data.socketRoom)
 
                     data.usersOnline.map( userOnline => {
                         // update user status
@@ -183,7 +182,8 @@
         computed: mapState({
             // arrow functions can make the code very succinct!
             isChat: state => state.isChat,
-            profile: state => state.userProfile
+            profile: state => state.userProfile,
+            socket: state => state.socket,
         }),
         mounted () {
             console.log(screen.width)

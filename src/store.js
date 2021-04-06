@@ -1,6 +1,9 @@
 import { createStore } from 'vuex'
 import moment from 'moment';
 
+import io from 'socket.io-client';
+ 
+
 // Create a new store instance.
 
 const store = createStore({
@@ -19,7 +22,7 @@ const store = createStore({
         selectedRoomMessages: [],
         selectedUserMessages: [],
         userProfile: JSON.parse(localStorage.getItem('user-profile')) || '',
-        socket: '',
+        socket: io("http://localhost:4000", {transports: ['websocket']}),
         isChat: false,
         typing: false,
         toggleSearch: false,
@@ -69,6 +72,7 @@ const store = createStore({
 
                 // check if user exit
                 console.log(data)
+                console.log(state.users)
                 let ifUserExit = state.users.some( user => user.user === data.user)
 
                 console.log(ifUserExit)
@@ -98,6 +102,10 @@ const store = createStore({
         ADD_TO_ALL_ROOMS (state, rooms) {
             state.allRooms = rooms
             console.log(state.allRooms)
+        },
+        REMOVE_ROOM_FROM_ALL_ROOMS (state, roomToRemove) {
+            console.log('remove room', roomToRemove)
+            state.allRooms = state.allRooms.filter( room => room._id !== roomToRemove._id)
         },
         ADD_USER_PROFILE (state, data) {
 
