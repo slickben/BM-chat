@@ -22,7 +22,7 @@ const store = createStore({
         selectedRoomMessages: [],
         selectedUserMessages: [],
         userProfile: JSON.parse(localStorage.getItem('user-profile')) || '',
-        socket: io("http://localhost:4000", {transports: ['websocket']}),
+        socket: io("https://pacific-ocean-92747.herokuapp.com", {transports: ['websocket']}),
         isChat: false,
         typing: false,
         toggleSearch: false,
